@@ -12,14 +12,9 @@ def predict(url_or_path):
     
     # like in the dataset
     class_names = [
-        'Academism',   # 0
-        'Avantgard',   # 1
-        'Barokko',     # 2
-        'Iconopis',    # 3
-        'Modern',      # 4
-        'Parsuna',     # 5
-        'Peredviz',    # 6
-        'Romantism'    # 7
+            'Academism', 'Ampir', 'Avantgard', 'Barokko', 
+            'Constructivism', 'Iconopis', 'Modern', 'Parsuna', 
+            'Peredviz', 'Romantism', 'Suprimatism'
     ]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
