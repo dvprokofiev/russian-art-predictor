@@ -10,7 +10,6 @@ import os
 def predict(url_or_path):
     MODEL_PATH = "art_model_v3.pth"
     
-    # like in the dataset
     class_names = [
             'Academism', 'Ampir', 'Avantgard', 'Barokko', 
             'Constructivism', 'Iconopis', 'Modern', 'Parsuna', 
@@ -18,9 +17,11 @@ def predict(url_or_path):
     ]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = models.resnet50()
-    model.fc = nn.Sequential(
-        nn.Linear(model.fc.in_features, 512),
+    
+    model = models.efficientnet_b0()
+    model.classifier = nn.Sequential(
+        nn.Dropout(p=0.3, inplace=True),
+        nn.Linear(model.classifier[1].in_features, 512),
         nn.ReLU(),
         nn.Dropout(0.3),
         nn.Linear(512, len(class_names))
