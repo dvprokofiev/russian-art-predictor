@@ -19,7 +19,6 @@ def train_model():
 
     print(f"Используемое устройство: {DEVICE}")
 
-    # download dataset from HF
     print(f"Загрузка датасета {DATASET_REPO}...")
     dataset = load_dataset(DATASET_REPO, split="train")
 
@@ -29,6 +28,17 @@ def train_model():
 
     with open(CLASSES_SAVE_NAME, "w", encoding="utf-8") as f:
         json.dump(class_names, f, ensure_ascii=False)
+
+    targets = torch.tensor(dataset["label"])
+    class_sample_count = torch.tensor([(targets == t).sum() for t in range(num_classes)])
+    weight = 1. / class_sample_count.float()
+    samples_weights = torch.tensor([weight[t] for t in targets])
+
+    sampler = WeightedRandomSampler(
+        weights=samples_weights,
+        num_samples=len(samples_weights),
+        replacement=True
+    )
 
     train_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
@@ -41,21 +51,11 @@ def train_model():
     ])
 
     def apply_transforms(examples):
-        examples["pixel_values"] = [train_transforms(img.convert("RGB")) for img in examples["image"]]
+        if "image" in examples:
+            examples["pixel_values"] = [train_transforms(img.convert("RGB")) for img in examples["image"]]
         return examples
 
     dataset.set_transform(apply_transforms)
-
-    targets = torch.tensor(dataset["label"][:])
-    class_sample_count = torch.tensor([(targets == t).sum() for t in range(num_classes)])
-    weight = 1. / class_sample_count.float()
-    samples_weights = torch.tensor([weight[t] for t in targets])
-
-    sampler = WeightedRandomSampler(
-        weights=samples_weights,
-        num_samples=len(samples_weights),
-        replacement=True
-    )
 
     def collate_fn(examples):
         pixel_values = torch.stack([ex["pixel_values"] for ex in examples])
