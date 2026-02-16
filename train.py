@@ -46,7 +46,7 @@ def train_model():
 
     dataset.set_transform(apply_transforms)
 
-    targets = torch.tensor(dataset["label"])
+    targets = torch.tensor(dataset["label"][:])
     class_sample_count = torch.tensor([(targets == t).sum() for t in range(num_classes)])
     weight = 1. / class_sample_count.float()
     samples_weights = torch.tensor([weight[t] for t in targets])
